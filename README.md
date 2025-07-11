@@ -25,7 +25,9 @@
 
 ## 📝 Introduction
 
-**ChronosTasker** is a modern backend service developed in **Django** to handle **asynchronous background tasks** and **periodic job scheduling** efficiently. Leveraging **Celery** with **Redis** as the message broker, it supports scalable task execution, job monitoring, and concurrency management.
+**ChronosTasker** is a modern backend service developed in **Django** to handle **asynchronous background tasks** and *
+*periodic job scheduling** efficiently. Leveraging **Celery** with **Redis** as the message broker, it supports scalable
+task execution, job monitoring, and concurrency management.
 
 The system includes:
 
@@ -125,29 +127,29 @@ Create a .env file based on SAMPLE_ENV.txt and update configuration such as:
 
 ```ini
 # Environment type
-DJANGO_ENV=dev
+DJANGO_ENV = dev
 
 # SECURITY
-SECRET_KEY=my-secret-key
-DEBUG=False
-DEPLOY_STATE=True
+SECRET_KEY = my-secret-key
+DEBUG = False
+DEPLOY_STATE = True
 
 # DATABASE
-DB_TYPE=postgresql
-DATABASE_ENGINE=django.db.backends.postgresql_psycopg2
-DATABASE_NAME=my_db_name
-DATABASE_USER=my_db_user
-DATABASE_PASSWORD=my_db_password
-DATABASE_HOST=127.0.0.1
-DATABASE_PORT=5432
+DB_TYPE = postgresql
+DATABASE_ENGINE = django.db.backends.postgresql_psycopg2
+DATABASE_NAME = my_db_name
+DATABASE_USER = my_db_user
+DATABASE_PASSWORD = my_db_password
+DATABASE_HOST = 127.0.0.1
+DATABASE_PORT = 5432
 
 # CACHE (Redis)
-REDIS_LOCATION=redis://127.0.0.1:6379/1
-REDIS_TIMEOUT=300
+REDIS_LOCATION = redis://127.0.0.1:6379/1
+REDIS_TIMEOUT = 300
 
 # CELERY
-CELERY_BROKER_URL=redis://127.0.0.1:6379/0
-CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/1
+CELERY_BROKER_URL = redis://127.0.0.1:6379/0
+CELERY_RESULT_BACKEND = redis://127.0.0.1:6379/1
 ```
 
 ## ▶️ Running the Application
@@ -207,10 +209,10 @@ celery -A config beat -l info
 
 ChronosTasker supports two types of job schedulers:
 
-| Engine Type     | Description                                                              |
-|----------------|---------------------------------------------------------------------------|
-| In-Memory       | Default mode using Celery’s `add_periodic_task()` – not persistent       |
-| Persistent (Beat)| Uses `django-celery-beat` for DB-backed persistent periodic scheduling   |
+| Engine Type       | Description                                                            |
+|-------------------|------------------------------------------------------------------------|
+| In-Memory         | Default mode using Celery’s `add_periodic_task()` – not persistent     |
+| Persistent (Beat) | Uses `django-celery-beat` for DB-backed persistent periodic scheduling |
 
 ### 🧩 Switching to Persistent Scheduler (django-celery-beat)
 
