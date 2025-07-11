@@ -21,14 +21,14 @@ class ScheduledJobViewSet(viewsets.ModelViewSet):
         Hook to handle post-creation logic such as scheduling the job.
         """
         job = serializer.save()
-        job_service.schedule_job(job)
+        job_service.refresh_job(job)
 
     def perform_update(self, serializer):
         """
         Hook to handle job rescheduling after update.
         """
         job = serializer.save()
-        job_service.schedule_job(job)
+        job_service.refresh_job(job)
 
     @action(detail=True, methods=["post"])
     def activate(self, request, pk=None):
@@ -43,7 +43,7 @@ class ScheduledJobViewSet(viewsets.ModelViewSet):
         job.is_active = True
         job.save()
 
-        job_service.schedule_job(job)
+        job_service.refresh_job(job)
         return Response({"detail": "Job activated and scheduled successfully."}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
