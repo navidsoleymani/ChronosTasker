@@ -14,6 +14,7 @@
 - [Installation](#-installation)
 - [Running the Application](#-running-the-application)
 - [Celery & Task Scheduling](#-celery--task-scheduling)
+- [Scheduler Engines](#-scheduler-engines)
 - [Localization](#-localization)
 - [Testing](#-testing)
 - [Contributing](#-contributing)
@@ -24,9 +25,7 @@
 
 ## 📝 Introduction
 
-**ChronosTasker** is a modern backend service developed in **Django** to handle **asynchronous background tasks** and *
-*periodic job scheduling** efficiently. Leveraging **Celery** with **Redis** as the message broker, it supports scalable
-task execution, job monitoring, and concurrency management.
+**ChronosTasker** is a modern backend service developed in **Django** to handle **asynchronous background tasks** and **periodic job scheduling** efficiently. Leveraging **Celery** with **Redis** as the message broker, it supports scalable task execution, job monitoring, and concurrency management.
 
 The system includes:
 
@@ -77,7 +76,9 @@ ChronosTasker/
 ├── core/                   # Core utilities and shared logic
 │   ├── tasks.py            # Generic Celery tasks
 │   └── utils/
-│       └── scheduler.py    # Scheduler interfaces and helpers
+│       └── scheduler/
+│           ├── scheduler_engine.py        # In-memory scheduler engine
+│           └── beat_scheduler_engine.py   # Persistent scheduler engine (using django-celery-beat)
 ├── scheduler/              # Main scheduling Django app
 │   ├── models.py           # Job and schedule ORM models
 │   ├── serializers.py      # API serializers
@@ -123,7 +124,6 @@ pip install -r requirements.txt
 Create a .env file based on SAMPLE_ENV.txt and update configuration such as:
 
 ```ini
-
 # Environment type
 DJANGO_ENV=dev
 
@@ -148,7 +148,6 @@ REDIS_TIMEOUT=300
 # CELERY
 CELERY_BROKER_URL=redis://127.0.0.1:6379/0
 CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/1
-
 ```
 
 ## ▶️ Running the Application
@@ -194,28 +193,88 @@ celery -A config beat -l info
 
 ## 🔄 Celery & Task Scheduling
 
-- Celery app is configured in config/celery.py
+- Celery app is configured in `config/celery.py`
 - Redis is used as the broker for message passing
 - Periodic tasks managed by Celery Beat
 - Task implementations located under:
-- scheduler/tasks.py — Scheduler-specific tasks
-- core/tasks.py — Shared/general tasks
-- Scheduling logic & interfaces reside in core/utils/scheduler.py
+    - `scheduler/tasks.py` — Scheduler-specific Celery task handlers
+    - `core/tasks.py` — General-purpose reusable Celery tasks
+- Scheduling interfaces live in `core/utils/scheduler/` folder
 
-# 🌐 Localization
+---
+
+## 🔁 Scheduler Engines
+
+ChronosTasker supports two types of job schedulers:
+
+| Engine Type     | Description                                                              |
+|----------------|---------------------------------------------------------------------------|
+| In-Memory       | Default mode using Celery’s `add_periodic_task()` – not persistent       |
+| Persistent (Beat)| Uses `django-celery-beat` for DB-backed persistent periodic scheduling   |
+
+### 🧩 Switching to Persistent Scheduler (django-celery-beat)
+
+1. Install the dependency:
+
+```bash
+pip install django-celery-beat
+```
+
+2. Add it to your `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS += ['django_celery_beat']
+```
+
+3. Apply migrations:
+
+```bash
+python manage.py migrate
+```
+
+4. Use the persistent engine in your code:
+
+```python
+from core.utils.scheduler.beat_scheduler_engine import scheduler_engine
+```
+
+5. Start the beat scheduler with:
+
+```bash
+celery -A config beat -l info
+```
+
+---
+
+## 🌐 Localization
+
 - Supports English (en) and Persian (fa) languages
 - Translation files are managed with Django's makemessages and compilemessages commands
 - Localization files are located under the locale/ directory
 - Language is configurable via LANGUAGE_CODE in settings or runtime headers
 
+---
+
 ## 🧪 Testing
+
 Run the test suite with:
+
 ```bash
 pytest
 ```
-Tests are located in the tests/ directory and cover unit and integration scenarios for the scheduler app and tasks.
+
+You can also test a scheduled job manually via:
+
+```bash
+python manage.py test_schedule_job
+```
+
+This command creates and schedules a `ScheduledJob` to run as a one-off task.
+
+---
 
 ## 🤝 Contributing
+
 Contributions are welcome and encouraged!
 Please ensure:
 
@@ -224,12 +283,18 @@ Please ensure:
 - Add tests for new features or bug fixes
 - Open issues or pull requests with detailed descriptions
 
+---
+
 ## 📄 License
+
 This project is licensed under the MIT License — see the LICENSE file for details.
 
+---
+
 ## 📞 Contact
-Developed and maintained by Navid Soleymani
-Email: navidsoleymani@ymail.com
+
+Developed and maintained by Navid Soleymani  
+Email: navidsoleymani@ymail.com  
 GitHub: https://github.com/navidsoleymani
 
-<p align="center"> <em>Thank you for choosing ChronosTasker! ⏳⚙️</em> </p> ```
+<p align="center"> <em>Thank you for choosing ChronosTasker! ⏳⚙️</em> </p>
