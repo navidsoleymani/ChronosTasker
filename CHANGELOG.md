@@ -10,17 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Support for task metadata and tracking
-- Persian (`fa`) localization files
-- Dockerized Flower monitoring tool
+- `core/utils/scheduler/scheduler_engine.py`: Default in-memory scheduler using `Celery` with `apply_async` and `add_periodic_task`
+- `core/utils/scheduler/scheduler_engine_beat.py`: Persistent scheduler integrated with `django-celery-beat` storing jobs in DB
+- Management command `test_schedule_job` for creating and testing scheduled jobs
+- Singleton instance (`scheduler_engine`) for centralized scheduling control
+- Cron job registration via `PeriodicTask` and `CrontabSchedule` models
+- Dynamic task naming and cleanup logic for conflicting periodic tasks
 
 ### Changed
-- Updated Redis connection URL to be environment-based
-- Moved scheduler logic to `core/utils/scheduler.py`
+- Modularized scheduling engine into `core/utils/scheduler/` with clear separation of volatile vs persistent strategies
+- Improved exception handling and logging for job creation and scheduling
+- Updated README to reflect django-celery-beat support, scheduler engine types, and usage documentation
 
 ### Fixed
-- Issue with timezone mismatch in Celery Beat
-- Bug when listing periodic tasks without `interval` field
+- Bug with missing `description` field in `ScheduledJob` model migrations
+- AttributeError for missing `schedule_one_off` during engine import (caused by old compiled `.pyc` files)
+- Test setup errors due to uninitialized job scheduler
 
 ---
 
@@ -50,7 +55,6 @@ This project uses **Semantic Versioning**:
 
 MAJOR.MINOR.PATCH
 
-
 - **MAJOR**: Breaking changes
 - **MINOR**: Backward-compatible new features
 - **PATCH**: Backward-compatible bug fixes
@@ -59,9 +63,9 @@ MAJOR.MINOR.PATCH
 
 ## 📌 Legend
 
-- **Added** – new features
-- **Changed** – modifications in existing functionality
-- **Deprecated** – soon-to-be removed features
-- **Removed** – deprecated features now removed
-- **Fixed** – any bug fixes
-- **Security** – vulnerabilities fixed
+- **Added** – new features  
+- **Changed** – modifications in existing functionality  
+- **Deprecated** – soon-to-be removed features  
+- **Removed** – deprecated features now removed  
+- **Fixed** – any bug fixes  
+- **Security** – vulnerabilities fixed  
