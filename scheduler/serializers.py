@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from scheduler.models import ScheduledJob, JobStatus
+
+from scheduler.models import ScheduledJob
+
 
 class ScheduledJobSerializer(serializers.ModelSerializer):
     class Meta:
