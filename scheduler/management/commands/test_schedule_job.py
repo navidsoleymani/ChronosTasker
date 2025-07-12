@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "Test job scheduling using django-celery-beat backend."
 
     def handle(self, *args, **options):
-        from core.utils.scheduler.scheduler_engine import scheduler_engine
+        from core.utils.scheduler import engine as scheduler_engine
 
         # Create a one-off job to run in 2 minutes
         job = ScheduledJob.objects.create(
