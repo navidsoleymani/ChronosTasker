@@ -30,6 +30,8 @@ fi
 
 # Step 3: Build and run Docker containers
 echo "Starting Docker containers with docker-compose..."
-# docker-compose down --rmi local
-# docker system prune -f
+#docker-compose down --rmi local
+#docker-compose down --volumes --remove-orphans
+#docker system prune -f
+
 docker-compose up --build

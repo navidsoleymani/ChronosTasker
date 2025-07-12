@@ -65,3 +65,4 @@ front-end
 /output.xlsx
 /for.dev.env
 */django.po
+/staticfiles/

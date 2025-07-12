@@ -39,6 +39,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Must be before CommonMiddleware
 
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -98,7 +99,8 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 # Static and media files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'staticfilesdirs'),)
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticroot')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mediaroot')
