@@ -64,5 +64,5 @@ db.sqlite3
 front-end
 /output.xlsx
 /for.dev.env
-*/django.po
+*/django.mo
 /staticfiles/
