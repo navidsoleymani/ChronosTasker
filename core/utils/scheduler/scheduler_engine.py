@@ -12,9 +12,6 @@ class SchedulerEngine:
     """
     SchedulerEngine handles dynamic scheduling of jobs using Celery's `apply_async`
     for one-off tasks and `add_periodic_task` for cron-style recurring tasks.
-
-    NOTE: Dynamic periodic tasks using Celery Beat do not persist across restarts
-    unless you're using `django-celery-beat`.
     """
 
     def schedule_one_off(self, job: ScheduledJob):
@@ -35,10 +32,6 @@ class SchedulerEngine:
     def schedule_cron(self, job: ScheduledJob):
         """
         Schedule a recurring job using a cron expression via Celery's `add_periodic_task`.
-
-        WARNING:
-        - This approach does NOT persist across process restarts.
-        - For production-grade usage, consider `django-celery-beat`.
 
         Args:
             job (ScheduledJob): Job instance with a valid cron expression.
@@ -66,7 +59,8 @@ class SchedulerEngine:
             logger.info(f"[SchedulerEngine] Cron job {job.id} scheduled with expression '{job.cron_expression}'.")
 
         except ValueError as ve:
-            logger.error(f"[SchedulerEngine] Malformed cron expression for job {job.id}: {job.cron_expression}. Error: {ve}")
+            logger.error(
+                f"[SchedulerEngine] Malformed cron expression for job {job.id}: {job.cron_expression}. Error: {ve}")
         except Exception as e:
             logger.error(f"[SchedulerEngine] Failed to schedule cron job {job.id}: {e}")
 
@@ -74,9 +68,6 @@ class SchedulerEngine:
         """
         Attempt to remove a job from the scheduler. No-op for now.
 
-        NOTE:
-        Celery does not support dynamic removal of periodic tasks at runtime.
-        Use `django-celery-beat` to support persistent removal.
         """
         logger.warning(f"[SchedulerEngine] Removal of job {job_id} is not supported in this setup.")
 
