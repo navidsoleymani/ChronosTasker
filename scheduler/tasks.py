@@ -3,6 +3,7 @@ import traceback
 from importlib import import_module
 
 from celery import shared_task
+from celery.exceptions import MaxRetriesExceededError
 from django.utils import timezone
 from scheduler.models import ScheduledJob, JobStatus
 
@@ -17,7 +18,6 @@ def run_scheduled_job(self, job_id):
 
     Args:
         job_id (int): ID of the ScheduledJob instance to run.
-        :param self: ...
     """
     from scheduler.services import job_service
 
@@ -27,8 +27,13 @@ def run_scheduled_job(self, job_id):
         logger.warning(f"[Task] Job with id {job_id} does not exist.")
         return
 
+    # Check if the job is active and not expired
     if not job.is_active:
         logger.info(f"[Task] Skipping inactive job {job_id}.")
+        return
+
+    if job.end_time and timezone.now() > job.end_time:
+        logger.info(f"[Task] Skipping expired job {job_id} (past end_time).")
         return
 
     logger.info(f"[Task] Running job {job_id} ({job.name})")
@@ -53,8 +58,23 @@ def run_scheduled_job(self, job_id):
         logger.error(error_msg)
         job_service.handle_job_failure(job, error_message=str(exc))
 
-        # Retry the task with exponential backoff (optional)
-        raise self.retry(exc=exc, countdown=60, max_retries=3)
+        # Retry with job-defined max_retries
+        if job.max_retries > 0:
+            try:
+                rkw = {
+                    'exc': exc,
+                    'countdown': 60,
+                    'max_retries': job.max_retries,
+                }
+                if job.end_time:
+                    rkw['expires'] = job.end_time
+                raise self.retry(**rkw)
+            except MaxRetriesExceededError:
+                logger.warning(f"[Task] Max retries exceeded for job {job_id}.")
+                return
+            except Exception as retry_error:
+                logger.error(f"[Task] Retry failed to queue for job {job_id}: {retry_error}")
+                return
 
 
 def _execute_job_logic(job: ScheduledJob):
