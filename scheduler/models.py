@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from utils.db.models import BaseModel
+
 
 # Status choices for the lifecycle of a scheduled job
 class JobStatus(models.TextChoices):
@@ -14,7 +16,7 @@ class JobStatus(models.TextChoices):
 
 
 # Main model for a scheduled task/job
-class ScheduledJob(models.Model):
+class ScheduledJob(BaseModel):
     # Human-readable name of the job
     name = models.CharField(
         verbose_name=_('Name'),
@@ -109,14 +111,15 @@ class ScheduledJob(models.Model):
         db_index=True  # Often filtered in scheduler logic
     )
 
-    # Timestamps for job creation and last update
-    created_at = models.DateTimeField(
-        verbose_name=_('Created At'),
-        auto_now_add=True,
+    result = models.TextField(
+        verbose_name=_('Result'),
+        blank=True,
+        null=True,
     )
-    updated_at = models.DateTimeField(
-        verbose_name=_('Updated At'),
-        auto_now=True,
+    error_message = models.TextField(
+        verbose_name=_('Error Message'),
+        blank=True,
+        null=True,
     )
 
     class Meta:

@@ -7,7 +7,16 @@ class ScheduledJobSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduledJob
         fields = '__all__'
-        read_only_fields = ['id', 'status', 'last_run_at', 'next_run_at', 'created_at', 'updated_at']
+        read_only_fields = [
+            'id',
+            'status',
+            'last_run_at',
+            'next_run_at',
+            'result',
+            'error_message',
+            'created_at',
+            'updated_at',
+        ]
 
     def validate(self, data):
         """

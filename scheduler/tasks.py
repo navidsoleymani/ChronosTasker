@@ -36,7 +36,7 @@ def run_scheduled_job(self, job_id):
         logger.info(f"[Task] Skipping expired job {job_id} (past end_time).")
         return
 
-    logger.info(f"[Task] Running job {job_id} ({job.name})")
+    logger.info(f"[Task] Running job {job_id} ({job.name}) at {timezone.now()}")
 
     # Update job as running
     job.status = JobStatus.RUNNING
@@ -48,7 +48,9 @@ def run_scheduled_job(self, job_id):
         result = _execute_job_logic(job)
 
         # Handle success
+        job.result = str(result)[:2048]  # truncate if large
         job_service.handle_job_success(job, result=result)
+        job.save(update_fields=['result', 'status', 'last_run_at', 'updated_at'])
         logger.info(f"[Task] Job {job_id} executed successfully.")
         return result
 
@@ -56,7 +58,9 @@ def run_scheduled_job(self, job_id):
         # Handle failure
         error_msg = f"[Task] Job {job_id} failed: {exc}\n{traceback.format_exc()}"
         logger.error(error_msg)
+        job.error_message = str(exc)[:2048]  # truncate if large
         job_service.handle_job_failure(job, error_message=str(exc))
+        job.save(update_fields=['error_message', 'status', 'updated_at'])
 
         # Retry with job-defined max_retries
         if job.max_retries > 0:
