@@ -14,6 +14,7 @@ from config.settings import (
     MEDIA_ROOT,
 )
 
+# Swagger/OpenAPI schema configuration
 schema_view = get_schema_view(
     openapi.Info(
         title="ChronosTasker APIs",
@@ -26,17 +27,33 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 
+# Main URL patterns
 urlpatterns = (
-        [
-            re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-            path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-            path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-            path('api/v1/', include('config.interfaces.v1')),
-        ]
-        + i18n_patterns(path('admin/', admin.site.urls), )
-        + static(STATIC_URL, document_root=STATIC_ROOT)
-        + static(MEDIA_URL, document_root=MEDIA_ROOT)
+    [
+        # Swagger schema in JSON or YAML format
+        re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+
+        # Swagger UI documentation
+        path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+
+        # ReDoc documentation UI
+        path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+        # API version 1 interface
+        path('api/v1/', include('config.interfaces.v1')),
+    ]
+
+    # Admin panel with language internationalization support
+    + i18n_patterns(
+        path('admin/', admin.site.urls),
+    )
+
+    # Static and media files configuration
+    + static(STATIC_URL, document_root=STATIC_ROOT)
+    + static(MEDIA_URL, document_root=MEDIA_ROOT)
 )
+
+# Admin site branding and titles (supports i18n)
 admin.site.site_header = 'ChronosTasker'
 admin.site.site_title = 'ChronosTasker.com'
 admin.site.index_title = _('ChronosTasker Management Panel')
