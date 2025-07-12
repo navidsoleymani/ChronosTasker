@@ -6,12 +6,7 @@ from scheduler.models import ScheduledJob
 class ScheduledJobSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScheduledJob
-        fields = [
-            'id', 'name', 'task_path', 'args', 'kwargs',
-            'one_off_run_time', 'cron_expression',
-            'status', 'last_run_at', 'next_run_at',
-            'is_active', 'created_at', 'updated_at',
-        ]
+        fields = '__all__'
         read_only_fields = ['id', 'status', 'last_run_at', 'next_run_at', 'created_at', 'updated_at']
 
     def validate(self, data):
