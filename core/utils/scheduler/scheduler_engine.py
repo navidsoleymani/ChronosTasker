@@ -24,7 +24,7 @@ class SchedulerEngine:
         eta = job.one_off_run_time
 
         if eta and eta > timezone.now():
-            run_scheduled_job.apply_async(args=[job.id], eta=eta)
+            run_scheduled_job.apply_async(args=[job.id], eta=eta, expires=job.end_time)
             logger.info(f"[SchedulerEngine] One-off job {job.id} scheduled at {eta}.")
         else:
             logger.warning(f"[SchedulerEngine] Invalid or past datetime for job {job.id}: {eta}")
