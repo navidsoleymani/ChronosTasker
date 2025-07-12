@@ -15,6 +15,7 @@
 - [Running the Application](#-running-the-application)
 - [Celery & Task Scheduling](#-celery--task-scheduling)
 - [Scheduler Engines](#-scheduler-engines)
+- [API Endpoints](#-api-endpoints)
 - [Localization](#-localization)
 - [Testing](#-testing)
 - [Contributing](#-contributing)
@@ -48,6 +49,8 @@ The system includes:
 - ✅ Optional Celery monitoring via Flower dashboard
 - ✅ Clean modular Django project structure
 - ✅ Comprehensive code documentation and comments
+- ✅ REST API with Swagger (DRF auto schema)
+- ✅ Custom activation/deactivation logic for scheduled jobs
 
 ---
 
@@ -74,28 +77,18 @@ ChronosTasker/
 │   ├── celery.py           # Celery app instance & settings
 │   ├── settings/           # Django settings by environment
 │   ├── urls.py             # Project-level URL routing
-│   └── ...
 ├── core/                   # Core utilities and shared logic
 │   ├── tasks.py            # Generic Celery tasks
-│   └── utils/
-│       └── scheduler/
-│           ├── scheduler_engine.py        # In-memory scheduler engine
-│           └── beat_scheduler_engine.py   # Persistent scheduler engine (using django-celery-beat)
+│   └── utils/scheduler/    # Scheduler engines
 ├── scheduler/              # Main scheduling Django app
 │   ├── models.py           # Job and schedule ORM models
 │   ├── serializers.py      # API serializers
 │   ├── services.py         # Business logic & service layer
 │   ├── tasks.py            # Scheduler-specific Celery tasks
-│   ├── views.py            # API views & endpoints
-│   └── urls.py             # App-level URL routing
-├── tests/                  # Unit and integration tests
-│   └── scheduler/
-│       └── test_tasks.py
-├── Dockerfile              # Docker image build instructions
-├── docker-compose.yml      # Docker compose orchestration
-├── requirements.txt        # Python dependencies
-├── manage.py               # Django management CLI
-└── README.md               # This documentation
+│   ├── views.py            # DRF ViewSet and API logic
+│   └── urls.py             # Router exposing `/jobs/` API
+├── tests/                  # Pytest test suite
+├── Dockerfile, docker-compose.yml, etc.
 ```
 
 ## ⚙️ Installation
@@ -244,6 +237,65 @@ from core.utils.scheduler.beat_scheduler_engine import scheduler_engine
 
 ```bash
 celery -A config beat -l info
+```
+
+---
+
+## 📡 API Endpoints
+
+All endpoints are available under: `http://localhost:8000/api/v1/scheduler/`
+
+### 🔧 CRUD Operations on Scheduled Jobs
+
+| Method | Endpoint      | Description                |
+|--------|---------------|----------------------------|
+| GET    | `/jobs/`      | List all scheduled jobs    |
+| POST   | `/jobs/`      | Create a new scheduled job |
+| GET    | `/jobs/{id}/` | Retrieve a job             |
+| PUT    | `/jobs/{id}/` | Fully update a job         |
+| PATCH  | `/jobs/{id}/` | Partially update a job     |
+| DELETE | `/jobs/{id}/` | Delete a job               |
+
+### 🔌 Activation/Deactivation
+
+| Method | Endpoint                 | Description                               |
+|--------|--------------------------|-------------------------------------------|
+| POST   | `/jobs/{id}/activate/`   | Activate and immediately schedule the job |
+| POST   | `/jobs/{id}/deactivate/` | Deactivate the job (future runs disabled) |
+
+---
+
+## 📦 Payload Fields (Job Schema)
+
+- `name`: string — required, unique name for the job
+- `task_path`: string — import path of the Celery task (e.g., `scheduler.tasks.send_email_task`)
+- `args`: object — optional list of positional arguments (JSON)
+- `kwargs`: object — optional dict of keyword arguments (JSON)
+- `one_off_run_time`: datetime — optional, for single-run jobs
+- `cron_expression`: string — optional, for periodic jobs (e.g., `* * * * *`)
+- `is_active`: boolean — job is enabled or not
+
+> ⚠️ Either `one_off_run_time` or `cron_expression` must be provided.
+
+---
+
+## 🧪 Example Usage (cURL)
+
+```bash
+# Create a new scheduled job
+curl -X POST http://localhost:8000/api/v1/scheduler/jobs/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my_job",
+    "task_path": "scheduler.tasks.send_email_task",
+    "args": ["user@example.com"],
+    "kwargs": {"subject": "Hi", "body": "Welcome!"},
+    "cron_expression": "*/5 * * * *",
+    "is_active": true
+  }'
+
+# Activate an existing job
+curl -X POST http://localhost:8000/api/v1/scheduler/jobs/1/activate/
 ```
 
 ---
