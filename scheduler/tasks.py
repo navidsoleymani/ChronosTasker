@@ -123,3 +123,24 @@ def add(x, y):
         int | float: The result of addition.
     """
     return x + y
+
+
+@shared_task(bind=True, name='scheduler.tasks.send_email_task')
+def send_email_task(self, recipient_email, subject="No Subject", body=""):
+    """
+    A mocked task that simulates sending an email.
+
+    Args:
+        recipient_email (str): The recipient's email address.
+        subject (str): Subject line of the email.
+        body (str): Content of the email body.
+
+    Returns:
+        str: Success message for the simulated email.
+    """
+    logger.info(f"[EmailTask] Sending email to {recipient_email}")
+    logger.info(f"[EmailTask] Subject: {subject}")
+    logger.info(f"[EmailTask] Body: {body}")
+
+    # todo Simulate sending delay or logic here
+    return f"Email sent to {recipient_email} with subject: {subject}"
