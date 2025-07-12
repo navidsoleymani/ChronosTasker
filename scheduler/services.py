@@ -25,7 +25,7 @@ class JobService:
 
         Existing job instances are unscheduled before re-adding them.
         """
-        from core.utils.scheduler import scheduler_engine  # Our scheduler interface
+        from core.utils.scheduler import engine as scheduler_engine
 
         if not job.is_active:
             logger.info(f"[JobService] Job {job.id} is inactive. Skipping scheduling.")
@@ -54,7 +54,7 @@ class JobService:
         """
         Remove the job from the scheduler engine (if it exists).
         """
-        from core.utils.scheduler import scheduler_engine
+        from core.utils.scheduler import engine as scheduler_engine
 
         scheduler_engine.remove_job(job.id)
         logger.info(f"[JobService] Unscheduling job {job.id} from scheduler.")
