@@ -10,22 +10,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `core/utils/scheduler/scheduler_engine.py`: Default in-memory scheduler using `Celery` with `apply_async` and `add_periodic_task`
-- `core/utils/scheduler/scheduler_engine_beat.py`: Persistent scheduler integrated with `django-celery-beat` storing jobs in DB
-- Management command `test_schedule_job` for creating and testing scheduled jobs
-- Singleton instance (`scheduler_engine`) for centralized scheduling control
-- Cron job registration via `PeriodicTask` and `CrontabSchedule` models
-- Dynamic task naming and cleanup logic for conflicting periodic tasks
+- ✅ **API**: `ScheduledJobViewSet` with full CRUD and custom actions `activate`/`deactivate`
+- ✅ **Celery Task**: New `send_email_task` simulating email delivery with subject/body to recipients
+- ✅ **Swagger**: Auto-generated OpenAPI schema for `/jobs/`, `/jobs/{id}/activate/`, `/jobs/{id}/deactivate/`
+- ✅ **Admin Command**: `test_schedule_job` for testing one-off job execution
+- ✅ **Localization**: Persian translations added for scheduler app
+- ✅ **Documentation**: Full `README.md` overhaul with features, structure, setup, Docker, scheduling engine config
+- ✅ **Project Structure**:
+  - `scheduler/serializers.py`, `services.py`, `views.py`, `urls.py`
+  - `core/utils/scheduler/scheduler_engine.py`: Default in-memory scheduler using `Celery`
+  - `core/utils/scheduler/beat_scheduler_engine.py`: Persistent engine using `django-celery-beat`
 
 ### Changed
-- Modularized scheduling engine into `core/utils/scheduler/` with clear separation of volatile vs persistent strategies
-- Improved exception handling and logging for job creation and scheduling
-- Updated README to reflect django-celery-beat support, scheduler engine types, and usage documentation
+- 🔧 Modularized scheduler logic into `scheduler_engine` and `beat_scheduler_engine` under `core/utils/scheduler/`
+- 🔧 Improved logging and error handling in `run_scheduled_job` task
+- 🔧 Enhanced `run_scheduled_job` to handle retries with `job.max_retries` and `job.end_time`
+- 🔧 Swagger documentation enriched with detailed descriptions and parameter metadata
+- 🔧 README now includes:
+  - Task engine types
+  - cURL example for posting new jobs
+  - Sample `send_email_task` and test instructions
+  - Switching to persistent engine (django-celery-beat)
 
 ### Fixed
-- Bug with missing `description` field in `ScheduledJob` model migrations
-- AttributeError for missing `schedule_one_off` during engine import (caused by old compiled `.pyc` files)
-- Test setup errors due to uninitialized job scheduler
+- 🐞 AttributeError during `scheduler_engine` import caused by stale `.pyc` files
+- 🐞 `ScheduledJob` migration missing `description` field (fixed in `0002_...`)
+- 🐞 Missing job scheduling during `.save()` (hooked via `perform_create`, `perform_update` in ViewSet)
 
 ---
 
