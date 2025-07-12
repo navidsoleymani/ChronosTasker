@@ -1,5 +1,5 @@
 from django.contrib import admin
-from scheduler.models import ScheduledJob, JobExecutionLog
+from scheduler.models import ScheduledJob
 
 
 @admin.register(ScheduledJob)
@@ -27,16 +27,3 @@ class ScheduledJobAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at')
         }),
     )
-
-
-@admin.register(JobExecutionLog)
-class JobExecutionLogAdmin(admin.ModelAdmin):
-    """
-    Admin configuration for JobExecutionLog model.
-    Displays logs of job executions including result and error messages.
-    """
-    list_display = ('id', 'job', 'started_at', 'finished_at', 'status')
-    list_filter = ('status',)
-    search_fields = ('job__name', 'error_message')
-    ordering = ('-started_at',)
-    readonly_fields = ('started_at', 'finished_at', 'status', 'result', 'error_message')
